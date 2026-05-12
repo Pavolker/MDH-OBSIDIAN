@@ -3,173 +3,137 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MDH EMPRESA — Diagnóstico Estrutural</title>
+<title>MDH EMPRESA</title>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,sans-serif;background:#0f0f1a;color:#eee;overflow:hidden;height:100vh}
-
-/* TOP NAV */
-#topbar{position:fixed;top:0;left:0;right:0;height:48px;background:rgba(15,15,26,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;padding:0 24px;z-index:200;gap:4px}
-#topbar .brand{font-weight:700;font-size:15px;letter-spacing:-.3px;margin-right:24px;color:#D97757}
-.mode-btn{background:transparent;border:none;color:rgba(255,255,255,.4);padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:.2s}
-.mode-btn:hover{color:rgba(255,255,255,.7)}
-.mode-btn.active{color:#fff;background:rgba(217,119,87,.15)}
-#score-badge{margin-left:auto;font-size:12px;padding:4px 12px;border-radius:100px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.5)}
-
-/* MAIN VIEWS */
-.view{display:none;position:fixed;top:48px;left:0;right:0;bottom:0}
-.view.active{display:flex}
-
-/* BASE VIEW — graph */
-#view-base{background:#1a1a2e}
-#view-base svg{width:100%;height:100%}
-#base-controls{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:rgba(26,26,46,.9);backdrop-filter:blur(12px);padding:10px 20px;border-radius:12px;border:1px solid rgba(255,255,255,.06);z-index:100}
-#base-controls button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#fff;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:12px}
-#base-controls button:hover{background:rgba(255,255,255,.18)}
-#base-status{color:rgba(255,255,255,.45);font-size:11px;min-width:120px;text-align:center}
-#base-bar{position:fixed;top:48px;left:0;right:0;height:2px;background:rgba(255,255,255,.04);z-index:150}
-#base-bar-fill{height:100%;background:linear-gradient(90deg,#3A86FF,#8338EC,#FF006E,#FB5607,#FFBE0B,#06D6A0,#118AB2,#EF476F,#073B4C);width:0%;transition:width .3s}
-
-/* REAL VIEW */
-#view-real{flex-direction:column;padding:20px 32px;overflow-y:auto}
-#view-real h2{font-size:18px;font-weight:600;margin-bottom:4px}
-#view-real p{color:rgba(255,255,255,.4);font-size:13px;margin-bottom:20px}
-.real-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;padding-bottom:40px}
-.real-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;overflow:hidden}
-.real-card-header{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-weight:600;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04)}
-.real-card-header .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.real-card-header .count{font-size:11px;color:rgba(255,255,255,.35);font-weight:400;margin-left:auto}
-.real-items{padding:8px;display:flex;flex-direction:column;gap:4px}
-.real-item{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:8px;cursor:pointer;transition:.15s;font-size:13px}
-.real-item:hover{background:rgba(255,255,255,.04)}
-.real-item input[type=checkbox]{width:16px;height:16px;accent-color:#D97757;cursor:pointer;flex-shrink:0}
-.real-item .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-left:auto}
-.real-item .label{flex:1;color:rgba(255,255,255,.7)}
-.real-item.checked .label{color:#fff;text-decoration:line-through;text-decoration-color:rgba(255,255,255,.2)}
-.real-item.partial .label{color:rgba(255,255,255,.7)}
-.real-item .partial-btn{background:transparent;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.35);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;transition:.2s}
-.real-item .partial-btn.active{background:rgba(255,193,7,.15);border-color:#ffc107;color:#ffc107}
-
-/* GAP VIEW */
-#view-gap{flex-direction:column;padding:20px 32px;overflow-y:auto}
-#view-gap h2{font-size:18px;font-weight:600;margin-bottom:4px}
-#view-gap p{color:rgba(255,255,255,.4);font-size:13px;margin-bottom:20px}
-.gap-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.gap-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;text-align:center}
-.gap-card .num{font-size:28px;font-weight:700}
-.gap-card .label{font-size:12px;color:rgba(255,255,255,.4);margin-top:4px}
-.gap-card.green .num{color:#06D6A0}
-.gap-card.yellow .num{color:#FFBE0B}
-.gap-card.red .num{color:#EF476F}
-.gap-detail{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-.gap-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:14px}
-.gap-block h4{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.gap-block h4 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.gap-block .bar-wrap{height:6px;background:rgba(255,255,255,.06);border-radius:3px;margin-bottom:8px;overflow:hidden}
-.gap-block .bar-fill{height:100%;border-radius:3px;transition:width .5s}
-.gap-block .bar-label{font-size:11px;color:rgba(255,255,255,.35);display:flex;justify-content:space-between}
-.gap-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px}
-.gap-item .g-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.gap-item .g-label{color:rgba(255,255,255,.6);flex:1}
-.gap-item .g-status{font-size:10px;padding:2px 8px;border-radius:100px}
-.g-status.ok{background:rgba(6,214,160,.15);color:#06D6A0}
-.g-status.parcial{background:rgba(255,190,11,.15);color:#FFBE0B}
-.g-status.falta{background:rgba(239,71,111,.15);color:#EF476F}
-
-/* legend base */
-#base-legend{position:fixed;right:16px;top:64px;background:rgba(26,26,46,.85);backdrop-filter:blur(8px);padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.06);font-size:11px;z-index:100}
-.base-legend-item{display:flex;align-items:center;gap:6px;padding:2px 0;opacity:.4;transition:.3s}
-.base-legend-item.done{opacity:1}
-.base-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.base-legend-label{color:rgba(255,255,255,.6)}
-
-/* checkbox three-state */
-.three-state{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-radius:3px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:.15s;background:transparent}
-.three-state.sim{background:#06D6A0;border-color:#06D6A0;color:#fff}
-.three-state.parcial{background:#FFBE0B;border-color:#FFBE0B;color:#000}
-.three-state.nao{background:transparent;border-color:rgba(255,255,255,.15);color:transparent}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0f0f1a;color:#eee;overflow:hidden;height:100vh;width:100vw}
+#topbar{position:fixed;top:0;left:0;right:0;height:44px;background:rgba(15,15,26,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;padding:0 20px;z-index:200;gap:2px}
+#topbar .brand{font-weight:700;font-size:14px;color:#D97757;margin-right:20px}
+.mbtn{background:transparent;border:none;color:rgba(255,255,255,.35);padding:5px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;transition:.2s}
+.mbtn:hover{color:rgba(255,255,255,.6)}
+.mbtn.on{color:#fff;background:rgba(217,119,87,.15)}
+#sb{margin-left:auto;font-size:11px;padding:3px 10px;border-radius:100px;background:rgba(255,255,255,.04);color:rgba(255,255,255,.4)}
+.v{display:none;position:fixed;top:44px;left:0;right:0;bottom:0}
+.v.on{display:flex}
+#vb{background:#1a1a2e}
+#vb svg{width:100%;height:100%}
+#bc{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;background:rgba(26,26,46,.92);backdrop-filter:blur(12px);padding:8px 18px;border-radius:10px;border:1px solid rgba(255,255,255,.05);z-index:100;font-size:12px}
+#bc button{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);color:#fff;padding:4px 12px;border-radius:5px;cursor:pointer;font-size:11px}
+#bc button:hover{background:rgba(255,255,255,.15)}
+#bs{color:rgba(255,255,255,.4);min-width:100px;text-align:center}
+#bb{position:fixed;top:44px;left:0;right:0;height:2px;background:rgba(255,255,255,.03);z-index:150}
+#bbf{height:100%;background:linear-gradient(90deg,#3A86FF,#8338EC,#FF006E,#FB5607,#FFBE0B,#06D6A0,#118AB2,#EF476F,#073B4C);width:0%;transition:width .3s}
+#bl{position:fixed;right:14px;top:58px;background:rgba(26,26,46,.88);backdrop-filter:blur(8px);padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.05);font-size:10px;z-index:100}
+.bli{display:flex;align-items:center;gap:5px;padding:2px 0;opacity:.35;transition:.3s}
+.bli.ok{opacity:1}
+.bld{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.bll{color:rgba(255,255,255,.55)}
+#vr{flex-direction:column;padding:16px 24px;overflow-y:auto}
+#vr h2{font-size:16px;font-weight:600}
+#vr p{color:rgba(255,255,255,.35);font-size:12px;margin-bottom:16px}
+.rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;padding-bottom:40px}
+.rc{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:10px;overflow:hidden}
+.rch{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-weight:600;font-size:12px;border-bottom:1px solid rgba(255,255,255,.03)}
+.rch .d{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.rch .c{font-size:10px;color:rgba(255,255,255,.3);font-weight:400;margin-left:auto}
+.ri{padding:6px;display:flex;flex-direction:column;gap:3px}
+.re{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px}
+.re:hover{background:rgba(255,255,255,.03)}
+.ts{width:14px;height:14px;border:1.5px solid rgba(255,255,255,.18);border-radius:3px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;transition:.15s;background:transparent;color:transparent}
+.ts.s{background:#06D6A0;border-color:#06D6A0;color:#fff}
+.ts.p{background:#FFBE0B;border-color:#FFBE0B;color:#000}
+.re .l{flex:1;color:rgba(255,255,255,.65)}
+.re.s .l{color:#fff;text-decoration:line-through;text-decoration-color:rgba(255,255,255,.15)}
+#vg{flex-direction:column;padding:16px 24px;overflow-y:auto}
+#vg h2{font-size:16px;font-weight:600}
+#vg p{color:rgba(255,255,255,.35);font-size:12px;margin-bottom:16px}
+.gs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.gc{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:14px;text-align:center}
+.gc .n{font-size:24px;font-weight:700}
+.gc .l2{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px}
+.gc.g .n{color:#06D6A0}
+.gc.y .n{color:#FFBE0B}
+.gc.r .n{color:#EF476F}
+.gd{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.gb{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:12px}
+.gb h4{font-size:12px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.gb h4 .d{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.gb .bw{height:5px;background:rgba(255,255,255,.05);border-radius:2px;margin-bottom:6px;overflow:hidden}
+.gb .bf{height:100%;border-radius:2px;transition:width .5s}
+.gb .bl2{font-size:10px;color:rgba(255,255,255,.3);display:flex;justify-content:space-between}
+.gi{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px}
+.gi .gd2{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.gi .gl{color:rgba(255,255,255,.55);flex:1}
+.gi .gs2{font-size:9px;padding:1px 6px;border-radius:100px}
+.gs2.o{background:rgba(6,214,160,.12);color:#06D6A0}
+.gs2.p{background:rgba(255,190,11,.12);color:#FFBE0B}
+.gs2.f{background:rgba(239,71,111,.12);color:#EF476F}
 </style>
 </head>
 <body>
 
 <div id="topbar">
   <span class="brand">MDH EMPRESA</span>
-  <button class="mode-btn active" data-mode="base">🏗️ BASE</button>
-  <button class="mode-btn" data-mode="real">📋 REAL</button>
-  <button class="mode-btn" data-mode="gap">📊 GAP</button>
-  <span id="score-badge">BASE: 100%</span>
+  <button class="mbtn on" data-v="vb">🏗️ BASE</button>
+  <button class="mbtn" data-v="vr">📋 REAL</button>
+  <button class="mbtn" data-v="vg">📊 GAP</button>
+  <span id="sb">BASE 100%</span>
 </div>
 
-<!-- BASE -->
-<div id="view-base" class="view active">
-  <div id="base-bar"><div id="base-bar-fill"></div></div>
-  <svg id="base-svg"></svg>
-  <div id="base-legend"></div>
-  <div id="base-controls">
-    <button id="b-play">⏸</button>
-    <button id="b-reset">↺</button>
-    <button id="b-prev">◀</button>
-    <button id="b-next">▶</button>
-    <span id="base-status">0/51</span>
+<div id="vb" class="v on">
+  <div id="bb"><div id="bbf"></div></div>
+  <svg id="bsvg"></svg>
+  <div id="bl"></div>
+  <div id="bc">
+    <button id="bp">⏸</button>
+    <button id="br">↺</button>
+    <button id="bq">◀</button>
+    <button id="bn">▶</button>
+    <span id="bs">0/51</span>
   </div>
 </div>
 
-<!-- REAL -->
-<div id="view-real" class="view">
+<div id="vr" class="v">
   <h2>📋 Diagnóstico REAL</h2>
-  <p>Marque para cada documento: <strong style="color:#06D6A0">✓ Sim</strong> · <strong style="color:#FFBE0B">~ Parcial</strong> · <strong style="color:rgba(255,255,255,.2)">✗ Não</strong></p>
-  <div class="real-grid" id="real-grid"></div>
+  <p>Marque cada documento: <b style="color:#06D6A0">✓</b> Sim · <b style="color:#FFBE0B">~</b> Parcial · <b style="color:rgba(255,255,255,.2)">✗</b> Não</p>
+  <div class="rg" id="rg"></div>
 </div>
 
-<!-- GAP -->
-<div id="view-gap" class="view">
+<div id="vg" class="v">
   <h2>📊 Análise de GAP</h2>
-  <p>Comparação entre a estrutura ideal (BASE) e o diagnóstico da sua empresa (REAL).</p>
-  <div class="gap-summary" id="gap-summary"></div>
-  <div class="gap-detail" id="gap-detail"></div>
+  <p>Comparação BASE (ideal) × REAL (sua empresa)</p>
+  <div class="gs" id="gs"></div>
+  <div class="gd" id="gd"></div>
 </div>
 
 <script>
 const D = {"nodes":[{"id":"EMPRESA","label":"EMPRESA","block":"RAIZ","type":"root","blockNum":"00"},{"id":"02 - DOCUMENTOS JURIDICOS/Política de LGPD","label":"Política de LGPD","block":"02 - DOCUMENTOS JURIDICOS","type":"doc","blockNum":"02"},{"id":"02 - DOCUMENTOS JURIDICOS/Acordo de Sócios","label":"Acordo de Sócios","block":"02 - DOCUMENTOS JURIDICOS","type":"doc","blockNum":"02"},{"id":"02 - DOCUMENTOS JURIDICOS/Contrato Social","label":"Contrato Social","block":"02 - DOCUMENTOS JURIDICOS","type":"doc","blockNum":"02"},{"id":"02 - DOCUMENTOS JURIDICOS/Licenças e Registros","label":"Licenças e Registros","block":"02 - DOCUMENTOS JURIDICOS","type":"doc","blockNum":"02"},{"id":"02 - DOCUMENTOS JURIDICOS/Política de Compliance","label":"Política de Compliance","block":"02 - DOCUMENTOS JURIDICOS","type":"doc","blockNum":"02"},{"id":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","label":"JURÍDICO","block":"02 - DOCUMENTOS JURIDICOS","type":"index","blockNum":"02"},{"id":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial","label":"Plano Comercial","block":"04 - DOCUMENTOS COMERCIAIS","type":"doc","blockNum":"04"},{"id":"04 - DOCUMENTOS COMERCIAIS/Política Comercial","label":"Política Comercial","block":"04 - DOCUMENTOS COMERCIAIS","type":"doc","blockNum":"04"},{"id":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado","label":"Pesquisa de Mercado","block":"04 - DOCUMENTOS COMERCIAIS","type":"doc","blockNum":"04"},{"id":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","label":"COMERCIAL","block":"04 - DOCUMENTOS COMERCIAIS","type":"index","blockNum":"04"},{"id":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing","label":"Plano de Marketing","block":"04 - DOCUMENTOS COMERCIAIS","type":"doc","blockNum":"04"},{"id":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro","label":"Planejamento Financeiro","block":"03 - DOCUMENTOS FINANCEIROS","type":"doc","blockNum":"03"},{"id":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","label":"FINANCEIRO","block":"03 - DOCUMENTOS FINANCEIROS","type":"index","blockNum":"03"},{"id":"03 - DOCUMENTOS FINANCEIROS/Orçamento Empresarial","label":"Orçamento Empresarial","block":"03 - DOCUMENTOS FINANCEIROS","type":"doc","blockNum":"03"},{"id":"03 - DOCUMENTOS FINANCEIROS/Plano Tributário","label":"Plano Tributário","block":"03 - DOCUMENTOS FINANCEIROS","type":"doc","blockNum":"03"},{"id":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros","label":"Demonstrativos Financeiros","block":"03 - DOCUMENTOS FINANCEIROS","type":"doc","blockNum":"03"},{"id":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação","label":"Plano de Capacitação","block":"07 - DOCUMENTOS DE PESSOAS","type":"doc","blockNum":"07"},{"id":"07 - DOCUMENTOS DE PESSOAS/Avaliação de Desempenho","label":"Avaliação de Desempenho","block":"07 - DOCUMENTOS DE PESSOAS","type":"doc","blockNum":"07"},{"id":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador","label":"Manual do Colaborador","block":"07 - DOCUMENTOS DE PESSOAS","type":"doc","blockNum":"07"},{"id":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários","label":"Plano de Cargos e Salários","block":"07 - DOCUMENTOS DE PESSOAS","type":"doc","blockNum":"07"},{"id":"07 - DOCUMENTOS DE PESSOAS/Política de Governança","label":"Política de Governança","block":"07 - DOCUMENTOS DE PESSOAS","type":"doc","blockNum":"07"},{"id":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","label":"PESSOAS","block":"07 - DOCUMENTOS DE PESSOAS","type":"index","blockNum":"07"},{"id":"05 - DOCUMENTOS OPERACIONAIS/Plano de Qualidade","label":"Plano de Qualidade","block":"05 - DOCUMENTOS OPERACIONAIS","type":"doc","blockNum":"05"},{"id":"05 - DOCUMENTOS OPERACIONAIS/POP","label":"POP","block":"05 - DOCUMENTOS OPERACIONAIS","type":"doc","blockNum":"05"},{"id":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos","label":"Inventário de Ativos","block":"05 - DOCUMENTOS OPERACIONAIS","type":"doc","blockNum":"05"},{"id":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos","label":"Manual de Processos","block":"05 - DOCUMENTOS OPERACIONAIS","type":"doc","blockNum":"05"},{"id":"05 - DOCUMENTOS OPERACIONAIS/Organograma","label":"Organograma","block":"05 - DOCUMENTOS OPERACIONAIS","type":"doc","blockNum":"05"},{"id":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","label":"OPERACIONAL","block":"05 - DOCUMENTOS OPERACIONAIS","type":"index","blockNum":"05"},{"id":"09 - DOCUMENTOS DE INOVAÇÃO/Relatórios de Inteligência Competitiva","label":"Relatórios de Inteligência Competitiva","block":"09 - DOCUMENTOS DE INOVAÇÃO","type":"doc","blockNum":"09"},{"id":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","label":"INOVAÇÃO","block":"09 - DOCUMENTOS DE INOVAÇÃO","type":"index","blockNum":"09"},{"id":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital","label":"Plano de Transformação Digital","block":"09 - DOCUMENTOS DE INOVAÇÃO","type":"doc","blockNum":"09"},{"id":"09 - DOCUMENTOS DE INOVAÇÃO/Frameworks Metodológicos","label":"Frameworks Metodológicos","block":"09 - DOCUMENTOS DE INOVAÇÃO","type":"doc","blockNum":"09"},{"id":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico","label":"Roadmap Tecnológico","block":"09 - DOCUMENTOS DE INOVAÇÃO","type":"doc","blockNum":"09"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas","label":"Arquitetura de Sistemas","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação","label":"Plano de Backup e Recuperação","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Documento Funcional FSD","label":"Documento Funcional FSD","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","label":"TECNOLOGIA","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"index","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Documentação de APIs","label":"Documentação de APIs","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação","label":"Plano de Segurança da Informação","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Documento de Requisitos SRS","label":"Documento de Requisitos SRS","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","label":"ESTRATÉGICO","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"index","blockNum":"01"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico","label":"Planejamento Estratégico","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"doc","blockNum":"01"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático","label":"Plano Tático","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"doc","blockNum":"01"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios","label":"Plano de Negócios","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"doc","blockNum":"01"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC","label":"Mapa Estratégico BSC","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"doc","blockNum":"01"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional","label":"Plano Operacional","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"doc","blockNum":"01"},{"id":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","label":"CONTINUIDADE","block":"08 - DOCUMENTOS DE CONTINUIDADE","type":"index","blockNum":"08"},{"id":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos","label":"Matriz de Riscos","block":"08 - DOCUMENTOS DE CONTINUIDADE","type":"doc","blockNum":"08"},{"id":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP","label":"Plano de Continuidade BCP","block":"08 - DOCUMENTOS DE CONTINUIDADE","type":"doc","blockNum":"08"},{"id":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos","label":"Gestão de Riscos","block":"08 - DOCUMENTOS DE CONTINUIDADE","type":"doc","blockNum":"08"},{"id":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP","label":"Plano de Recuperação DRP","block":"08 - DOCUMENTOS DE CONTINUIDADE","type":"doc","blockNum":"08"}],"edges":[{"source":"EMPRESA","target":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO"},{"source":"EMPRESA","target":"02 - DOCUMENTOS JURIDICOS/JURÍDICO"},{"source":"EMPRESA","target":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO"},{"source":"EMPRESA","target":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL"},{"source":"EMPRESA","target":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL"},{"source":"EMPRESA","target":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA"},{"source":"EMPRESA","target":"07 - DOCUMENTOS DE PESSOAS/PESSOAS"},{"source":"EMPRESA","target":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE"},{"source":"EMPRESA","target":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO"},{"source":"EMPRESA","target":"02 - DOCUMENTOS JURIDICOS/Contrato Social"},{"source":"EMPRESA","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"EMPRESA","target":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro"},{"source":"EMPRESA","target":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial"},{"source":"EMPRESA","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional"},{"source":"EMPRESA","target":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros"},{"source":"EMPRESA","target":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos"},{"source":"EMPRESA","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"EMPRESA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"EMPRESA","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de LGPD","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de LGPD","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de LGPD","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"02 - DOCUMENTOS JURIDICOS/Acordo de Sócios","target":"02 - DOCUMENTOS JURIDICOS/Contrato Social"},{"source":"02 - DOCUMENTOS JURIDICOS/Acordo de Sócios","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"02 - DOCUMENTOS JURIDICOS/Acordo de Sócios","target":"07 - DOCUMENTOS DE PESSOAS/Política de Governança"},{"source":"02 - DOCUMENTOS JURIDICOS/Contrato Social","target":"02 - DOCUMENTOS JURIDICOS/Licenças e Registros"},{"source":"02 - DOCUMENTOS JURIDICOS/Contrato Social","target":"07 - DOCUMENTOS DE PESSOAS/Política de Governança"},{"source":"02 - DOCUMENTOS JURIDICOS/Licenças e Registros","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"02 - DOCUMENTOS JURIDICOS/Licenças e Registros","target":"03 - DOCUMENTOS FINANCEIROS/Plano Tributário"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de Compliance","target":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de Compliance","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de Compliance","target":"02 - DOCUMENTOS JURIDICOS/Contrato Social"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"02 - DOCUMENTOS JURIDICOS/Contrato Social"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"02 - DOCUMENTOS JURIDICOS/Acordo de Sócios"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"02 - DOCUMENTOS JURIDICOS/Licenças e Registros"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"02 - DOCUMENTOS JURIDICOS/Política de LGPD"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"07 - DOCUMENTOS DE PESSOAS/Política de Governança"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação"},{"source":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial","target":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing"},{"source":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial","target":"04 - DOCUMENTOS COMERCIAIS/Política Comercial"},{"source":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial","target":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado"},{"source":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial","target":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro"},{"source":"04 - DOCUMENTOS COMERCIAIS/Política Comercial","target":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing"},{"source":"04 - DOCUMENTOS COMERCIAIS/Política Comercial","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado","target":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing"},{"source":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado","target":"09 - DOCUMENTOS DE INOVAÇÃO/Relatórios de Inteligência Competitiva"},{"source":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"04 - DOCUMENTOS COMERCIAIS/Política Comercial"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro"},{"source":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro","target":"03 - DOCUMENTOS FINANCEIROS/Orçamento Empresarial"},{"source":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro","target":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros"},{"source":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro","target":"03 - DOCUMENTOS FINANCEIROS/Plano Tributário"},{"source":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"03 - DOCUMENTOS FINANCEIROS/Orçamento Empresarial"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"03 - DOCUMENTOS FINANCEIROS/Plano Tributário"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"03 - DOCUMENTOS FINANCEIROS/Orçamento Empresarial","target":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros"},{"source":"03 - DOCUMENTOS FINANCEIROS/Orçamento Empresarial","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"03 - DOCUMENTOS FINANCEIROS/Plano Tributário","target":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros"},{"source":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros","target":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC"},{"source":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação","target":"07 - DOCUMENTOS DE PESSOAS/Avaliação de Desempenho"},{"source":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários"},{"source":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação","target":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital"},{"source":"07 - DOCUMENTOS DE PESSOAS/Avaliação de Desempenho","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários"},{"source":"07 - DOCUMENTOS DE PESSOAS/Avaliação de Desempenho","target":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC"},{"source":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários"},{"source":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação"},{"source":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários","target":"05 - DOCUMENTOS OPERACIONAIS/Organograma"},{"source":"07 - DOCUMENTOS DE PESSOAS/Política de Governança","target":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador"},{"source":"07 - DOCUMENTOS DE PESSOAS/Política de Governança","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"07 - DOCUMENTOS DE PESSOAS/Avaliação de Desempenho"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"07 - DOCUMENTOS DE PESSOAS/Política de Governança"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"05 - DOCUMENTOS OPERACIONAIS/Organograma"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Plano de Qualidade","target":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Plano de Qualidade","target":"05 - DOCUMENTOS OPERACIONAIS/POP"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Plano de Qualidade","target":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/POP","target":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/POP","target":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos","target":"05 - DOCUMENTOS OPERACIONAIS/Organograma"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Organograma","target":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"05 - DOCUMENTOS OPERACIONAIS/POP"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"05 - DOCUMENTOS OPERACIONAIS/Organograma"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"05 - DOCUMENTOS OPERACIONAIS/Plano de Qualidade"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"07 - DOCUMENTOS DE PESSOAS/PESSOAS"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Relatórios de Inteligência Competitiva","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Relatórios de Inteligência Competitiva","target":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"09 - DOCUMENTOS DE INOVAÇÃO/Relatórios de Inteligência Competitiva"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"09 - DOCUMENTOS DE INOVAÇÃO/Frameworks Metodológicos"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital","target":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Frameworks Metodológicos","target":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Frameworks Metodológicos","target":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Frameworks Metodológicos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documento de Requisitos SRS"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documentação de APIs"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Documento Funcional FSD","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documento de Requisitos SRS"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Documento Funcional FSD","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Documento Funcional FSD","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documentação de APIs"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documento de Requisitos SRS"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documento Funcional FSD"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documentação de APIs"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Documentação de APIs","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documento de Requisitos SRS"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"07 - DOCUMENTOS DE PESSOAS/PESSOAS"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico","target":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático","target":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional","target":"05 - DOCUMENTOS OPERACIONAIS/POP"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional","target":"05 - DOCUMENTOS OPERACIONAIS/Organograma"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"}],"blockOrder":["01 - DOCUMENTOS ESTRATÉGICOS","02 - DOCUMENTOS JURIDICOS","03 - DOCUMENTOS FINANCEIROS","04 - DOCUMENTOS COMERCIAIS","05 - DOCUMENTOS OPERACIONAIS","06 - DOCUMENTOS DE TECNOLOGIA","07 - DOCUMENTOS DE PESSOAS","08 - DOCUMENTOS DE CONTINUIDADE","09 - DOCUMENTOS DE INOVAÇÃO"],"colors":{"RAIZ":"#4A4A4A","01 - DOCUMENTOS ESTRATÉGICOS":"#3A86FF","02 - DOCUMENTOS JURIDICOS":"#8338EC","03 - DOCUMENTOS FINANCEIROS":"#FF006E","04 - DOCUMENTOS COMERCIAIS":"#FB5607","05 - DOCUMENTOS OPERACIONAIS":"#FFBE0B","06 - DOCUMENTOS DE TECNOLOGIA":"#06D6A0","07 - DOCUMENTOS DE PESSOAS":"#118AB2","08 - DOCUMENTOS DE CONTINUIDADE":"#EF476F","09 - DOCUMENTOS DE INOVAÇÃO":"#073B4C"}};
-const COLORS = D.colors;
-const COLORS_HEX = {
-  'RAIZ':'#4A4A4A','01 - DOCUMENTOS ESTRATÉGICOS':'#3A86FF','02 - DOCUMENTOS JURIDICOS':'#8338EC',
-  '03 - DOCUMENTOS FINANCEIROS':'#FF006E','04 - DOCUMENTOS COMERCIAIS':'#FB5607',
-  '05 - DOCUMENTOS OPERACIONAIS':'#FFBE0B','06 - DOCUMENTOS DE TECNOLOGIA':'#06D6A0',
-  '07 - DOCUMENTOS DE PESSOAS':'#118AB2','08 - DOCUMENTOS DE CONTINUIDADE':'#EF476F',
-  '09 - DOCUMENTOS DE INOVAÇÃO':'#073B4C'
-};
-const BLOCK_NAMES = {'RAIZ':'EMPRESA'};
-D.blockOrder.forEach(b=>{BLOCK_NAMES[b]=b.substring(b.indexOf(' ')+1)});
+const CH = {'RAIZ':'#4A4A4A','01 - DOCUMENTOS ESTRATÉGICOS':'#3A86FF','02 - DOCUMENTOS JURIDICOS':'#8338EC','03 - DOCUMENTOS FINANCEIROS':'#FF006E','04 - DOCUMENTOS COMERCIAIS':'#FB5607','05 - DOCUMENTOS OPERACIONAIS':'#FFBE0B','06 - DOCUMENTOS DE TECNOLOGIA':'#06D6A0','07 - DOCUMENTOS DE PESSOAS':'#118AB2','08 - DOCUMENTOS DE CONTINUIDADE':'#EF476F','09 - DOCUMENTOS DE INOVAÇÃO':'#073B4C'};
+const BN = {'RAIZ':'EMPRESA'}; D.blockOrder.forEach(b=>{BN[b]=b.substring(b.indexOf(' ')+1)});
+const SK = 'mdh_real'; let RS = {}; try{RS=JSON.parse(localStorage.getItem(SK))||{}}catch(e){}
+function sv(){try{localStorage.setItem(SK,JSON.stringify(RS))}catch(e){}}
 
-const STORAGE_KEY = 'mdh_empresa_real';
-let realState = loadReal();
-
-// ─── BASE — animated graph ───
+// ─── BASE GRAPH ───
 (function(){
 const W=window.innerWidth,H=window.innerHeight;
-const SV=d3.select('#base-svg').attr('width',W).attr('height',H);
+const SV=d3.select('#bsvg').attr('width',W).attr('height',H);
 const G=SV.append('g');
 SV.call(d3.zoom().scaleExtent([.2,4]).on('zoom',e=>G.attr('transform',e.transform)));
 
 const sim=d3.forceSimulation(D.nodes)
-  .force('link',d3.forceLink(D.edges).id(d=>d.id).distance(85).strength(.25))
-  .force('charge',d3.forceManyBody().strength(-220))
+  .force('link',d3.forceLink(D.edges).id(d=>d.id).distance(80).strength(.2))
+  .force('charge',d3.forceManyBody().strength(-200))
   .force('center',d3.forceCenter(W/2,H/2))
-  .force('collision',d3.forceCollide(d=>d.type==='root'?30:d.type==='index'?24:16));
-sim.alpha(1).restart(); for(let i=0;i<200;i++) sim.tick(); sim.stop();
+  .force('collision',d3.forceCollide(d=>d.type==='root'?28:d.type==='index'?22:14));
 
 const link=G.append('g').selectAll('line').data(D.edges).join('line')
-  .attr('class','link').attr('stroke','#aaa').attr('stroke-width',.8)
-  .attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
-  .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y).style('opacity',0);
+  .attr('stroke','#aaa').attr('stroke-width',.7).style('opacity',0);
 const nodeG=G.append('g').selectAll('g').data(D.nodes).join('g').style('opacity',0);
-nodeG.append('circle').attr('r',0).attr('fill',d=>COLORS_HEX[d.block]||'#888');
+nodeG.append('circle').attr('r',0).attr('fill',d=>CH[d.block]||'#888');
 nodeG.append('text').attr('text-anchor','middle').attr('dy','.35em')
   .style('font-size','9px').style('fill','#fff').style('font-weight','500')
-  .style('text-shadow','0 1px 3px rgba(0,0,0,.8)')
-  .style('pointer-events','none').style('opacity',0)
+  .style('text-shadow','0 1px 3px rgba(0,0,0,.8)').style('pointer-events','none').style('opacity',0)
   .text(d=>d.label);
 
 sim.on('tick',()=>{
@@ -177,213 +141,148 @@ sim.on('tick',()=>{
   nodeG.attr('transform',d=>'translate('+d.x+','+d.y+')');
 });
 
-// Legend
-const legendDiv=d3.select('#base-legend');
-const legItems=[{id:'RAIZ',name:'EMPRESA',color:'#4A4A4A'}];
-D.blockOrder.forEach(b=>legItems.push({id:b,name:BLOCK_NAMES[b],color:COLORS_HEX[b]}));
-legItems.forEach(item=>{
-  const div=legendDiv.append('div').attr('class','base-legend-item').attr('data-block',item.id);
-  div.append('div').attr('class','base-legend-dot').style('background',item.color);
-  div.append('span').attr('class','base-legend-label').text(item.name);
-});
+sim.alpha(1).restart();
+for(let i=0;i<300;i++) sim.tick();
+sim.stop();
 
-// Queue
 const q=['EMPRESA'];
-D.blockOrder.forEach(block=>{
-  const ns=D.nodes.filter(n=>n.block===block);
-  const idx=ns.find(n=>n.type==='index');
-  if(idx) q.push(idx.id);
+D.blockOrder.forEach(b=>{
+  const ns=D.nodes.filter(n=>n.block===b);
+  const idx=ns.find(n=>n.type==='index');if(idx)q.push(idx.id);
   ns.filter(n=>n.type==='doc').forEach(n=>q.push(n.id));
 });
-const visible={};
-let pos=0,running=true,tid=null;
 
-function delay(){return Math.max(100,700-parseInt(5)*60)}
-function showNode(id){
-  if(visible[id])return;
-  visible[id]=true;
+const vis={};let pos=0,run=true,tid=null;
+function dl(){return Math.max(100,700-5*60)}
+function sw(id){
+  if(vis[id])return;vis[id]=true;
   const n=D.nodes.find(x=>x.id===id);if(!n)return;
-  const r=n.type==='root'?25:n.type==='index'?20:12;
+  const r=n.type==='root'?25:n.type==='index'?19:11;
   const el=nodeG.filter(d=>d.id===id);
-  el.style('opacity',1);
-  el.select('circle').transition().duration(350).attr('r',r);
-  el.select('text').transition().delay(150).duration(300).style('opacity',1);
+  el.style('opacity',1);el.select('circle').transition().duration(300).attr('r',r);
+  el.select('text').transition().delay(120).duration(250).style('opacity',1);
   D.edges.forEach(e=>{
     const s=typeof e.source==='object'?e.source.id:e.source;
     const t=typeof e.target==='object'?e.target.id:e.target;
-    if(visible[s]&&visible[t]) d3.select(link.filter(d=>d===e)).style('opacity',.2);
+    if(vis[s]&&vis[t]) d3.select(link.filter(d=>d===e)).style('opacity',.18);
   });
 }
-function updateUI(){
-  const tot=q.length,seen=Object.keys(visible).length;
-  document.getElementById('base-bar-fill').style.width=Math.min(100,(seen/tot)*100)+'%';
-  document.getElementById('base-status').textContent=seen+'/'+tot;
+function ui(){
+  const t=q.length,s=Object.keys(vis).length;
+  document.getElementById('bbf').style.width=Math.min(100,(s/t)*100)+'%';
+  document.getElementById('bs').textContent=s+'/'+t;
   D.blockOrder.forEach(b=>{
-    const all=D.nodes.filter(n=>n.block===b).every(n=>visible[n.id]);
-    d3.select('#base-legend').selectAll('.base-legend-item').filter(d=>d.id===b).classed('done',all);
+    const ok=D.nodes.filter(n=>n.block===b).every(n=>vis[n.id]);
+    d3.select('#bl').selectAll('.bli').filter(d=>d===b).classed('ok',ok);
   });
 }
-function next(){if(pos>=q.length){stop();return;}showNode(q[pos]);pos++;updateUI();if(pos>=q.length)stop();}
-function tick(){if(!running)return;next();if(pos<q.length){sim.alpha(.15).restart();tid=setTimeout(tick,delay());}}
-function stop(){running=false;if(tid){clearTimeout(tid);tid=null;}document.getElementById('b-play').textContent='▶';}
+function nx(){if(pos>=q.length){stp();return;}sw(q[pos]);pos++;ui();if(pos>=q.length)stp();}
+function tk(){if(!run)return;nx();if(pos<q.length){sim.alpha(.15).restart();tid=setTimeout(tk,dl());}}
+function stp(){run=false;if(tid){clearTimeout(tid);tid=null;}document.getElementById('bp').textContent='▶';}
 
-document.getElementById('b-play').onclick=()=>{
-  if(running){running=false;if(tid){clearTimeout(tid);tid=null;}document.getElementById('b-play').textContent='▶';}
-  else{if(pos>=q.length)pos=0;running=true;document.getElementById('b-play').textContent='⏸';if(pos<q.length)tick();}
+document.getElementById('bp').onclick=()=>{
+  if(run){run=false;if(tid){clearTimeout(tid);tid=null;}document.getElementById('bp').textContent='▶';}
+  else{if(pos>=q.length)pos=0;run=true;document.getElementById('bp').textContent='⏸';if(pos<q.length)tk();}
 };
-document.getElementById('b-reset').onclick=()=>{
-  stop();Object.keys(visible).forEach(k=>delete visible[k]);
+document.getElementById('br').onclick=()=>{
+  stp();Object.keys(vis).forEach(k=>delete vis[k]);
   nodeG.style('opacity',0).select('circle').attr('r',0);
-  d3.selectAll('#base-legend .base-legend-item').classed('done',false);
-  link.style('opacity',0);pos=0;updateUI();
-  document.getElementById('b-play').textContent='▶';
+  link.style('opacity',0);d3.selectAll('#bl .bli').classed('ok',false);
+  pos=0;ui();document.getElementById('bp').textContent='▶';
 };
-document.getElementById('b-prev').onclick=()=>{stop();if(pos>0){pos=Math.max(0,pos-2);Object.keys(visible).forEach(k=>delete visible[k]);nodeG.style('opacity',0).select('circle').attr('r',0);link.style('opacity',0);for(let i=0;i<=pos&&i<q.length;i++)showNode(q[i]);pos++;updateUI();}};
-document.getElementById('b-next').onclick=()=>{stop();next();};
+document.getElementById('bq').onclick=()=>{stp();if(pos>0){pos=Math.max(0,pos-2);Object.keys(vis).forEach(k=>delete vis[k]);nodeG.style('opacity',0).select('circle').attr('r',0);link.style('opacity',0);for(let i=0;i<=pos&&i<q.length;i++)sw(q[i]);pos++;ui();}};
+document.getElementById('bn').onclick=()=>{stp();nx();};
 
-showNode('EMPRESA');pos=1;updateUI();
-setTimeout(()=>{running=true;tick();},800);
+// Legend
+const li=[{id:'RAIZ',name:'EMPRESA',c:'#4A4A4A'}];
+D.blockOrder.forEach(b=>li.push({id:b,name:BN[b],c:CH[b]}));
+const ld=d3.select('#bl');
+li.forEach(i=>{const d=ld.append('div').attr('class','bli').attr('data-b',i.id);
+  d.append('div').attr('class','bld').style('background',i.c);
+  d.append('span').attr('class','bll').text(i.name);});
+
+sw('EMPRESA');pos=1;ui();
+setTimeout(()=>{run=true;tk();},600);
 })();
 
 // ─── MODE SWITCH ───
-document.querySelectorAll('.mode-btn').forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-    document.getElementById('view-'+btn.dataset.mode).classList.add('active');
-    if(btn.dataset.mode==='real')renderReal();
-    if(btn.dataset.mode==='gap')renderGap();
-  };
-});
+document.querySelectorAll('.mbtn').forEach(b=>{b.onclick=()=>{
+  document.querySelectorAll('.mbtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  document.querySelectorAll('.v').forEach(x=>x.classList.remove('on'));
+  document.getElementById(b.dataset.v).classList.add('on');
+  if(b.dataset.v==='vr')renderReal();
+  if(b.dataset.v==='vg')renderGap();
+}});
 
-// ─── REAL STATE ───
-function loadReal(){
-  try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}}catch(e){return{}}
+// ─── REAL ───
+function gs2(id){
+  if(RS[id]===undefined)return'';
+  return RS[id];
 }
-function saveReal(){
-  try{
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(realState));
-    updateScoreBadge();
-  }catch(e){}
+function cs(id){
+  const c=gs2(id);
+  const n=c===''?'s':c==='s'?'p':'';
+  if(n==='')delete RS[id];else RS[id]=n;
+  sv();renderReal();updateScore();
 }
-function getDocStatus(docId){
-  if(realState[docId]===undefined)return 'nao';
-  return realState[docId];
-}
-function setDocStatus(docId,status){
-  if(status==='nao')delete realState[docId];
-  else realState[docId]=status;
-  saveReal();
-}
-
-// ─── REAL RENDER ───
 function renderReal(){
-  const grid=document.getElementById('real-grid');
-  let html='';
-  D.blockOrder.forEach(block=>{
-    const ns=D.nodes.filter(n=>n.block===block);
+  let h='';
+  D.blockOrder.forEach(b=>{
+    const ns=D.nodes.filter(n=>n.block===b);
     const docs=ns.filter(n=>n.type==='doc');
     const idx=ns.find(n=>n.type==='index');
-    const total=docs.length;
-    const ok=docs.filter(d=>getDocStatus(d.id)==='sim').length;
-    const par=docs.filter(d=>getDocStatus(d.id)==='parcial').length;
-    const pct=total?Math.round((ok+par*0.5)/total*100):0;
-    const color=COLORS_HEX[block];
-    html+=`<div class="real-card">
-      <div class="real-card-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'">
-        <div class="dot" style="background:${color}"></div>
-        ${BLOCK_NAMES[block]}
-        <span class="count">${ok+par}/${total} (${pct}%)</span>
-      </div>
-      <div class="real-items">`;
+    const t=docs.length;
+    const ok=docs.filter(d=>gs2(d.id)==='s').length;
+    const pr=docs.filter(d=>gs2(d.id)==='p').length;
+    const pt=t?Math.round((ok+pr*0.5)/t*100):0;
+    const c=CH[b];
+    h+=`<div class="rc"><div class="rch" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none'"><div class="d" style="background:${c}"></div>${BN[b]}<span class="c">${ok+pr}/${t} (${pt}%)</span></div><div class="ri">`;
     docs.forEach(d=>{
-      const st=getDocStatus(d.id);
-      html+=`<div class="real-item ${st==='sim'?'checked':''}">
-        <div class="three-state ${st}" data-id="${d.id}" onclick="cycleStatus('${d.id}')">${st==='sim'?'✓':st==='parcial'?'~':''}</div>
-        <span class="label">${d.label}</span>
-      </div>`;
+      const st=gs2(d.id);
+      h+=`<div class="re ${st==='s'?'s':''}"><div class="ts ${st}" onclick="cs('${d.id}')">${st==='s'?'✓':st==='p'?'~':''}</div><span class="l">${d.label}</span></div>`;
     });
-    if(idx){
-      const st=getDocStatus(idx.id);
-      html+=`<div class="real-item ${st==='sim'?'checked':''}" style="opacity:.5;font-style:italic">
-        <div class="three-state ${st}" data-id="${idx.id}" onclick="cycleStatus('${idx.id}')">${st==='sim'?'✓':st==='parcial'?'~':''}</div>
-        <span class="label">📂 ${idx.label}</span>
-      </div>`;
-    }
-    html+=`</div></div>`;
+    h+=`</div></div>`;
   });
-  grid.innerHTML=html;
+  document.getElementById('rg').innerHTML=h;
+}
+function updateScore(){
+  let t=0,ok=0,pr=0;
+  D.nodes.filter(n=>n.type==='doc').forEach(d=>{t++;const g=gs2(d.id);if(g==='s')ok++;else if(g==='p')pr++;});
+  document.getElementById('sb').textContent=`BASE ${Math.round((ok+pr*0.5)/t*100)}% · REAL ${Math.round(ok/t*100)}%`;
 }
 
-function cycleStatus(id){
-  const st=getDocStatus(id);
-  const next=st==='nao'?'sim':st==='sim'?'parcial':'nao';
-  setDocStatus(id,next);
-  renderReal();
-}
-
-// ─── GAP RENDER ───
+// ─── GAP ───
 function renderGap(){
-  let total=0, ok=0, par=0;
-  D.nodes.filter(n=>n.type==='doc').forEach(d=>{
-    total++;
-    const st=getDocStatus(d.id);
-    if(st==='sim')ok++;
-    else if(st==='parcial')par++;
-  });
-  const falta=total-ok-par;
-  const pct=total?Math.round((ok+par*0.5)/total*100):0;
-
-  document.getElementById('gap-summary').innerHTML=`
-    <div class="gap-card green"><div class="num">${ok}</div><div class="label">✓ OK</div></div>
-    <div class="gap-card yellow"><div class="num">${par}</div><div class="label">~ Parcial</div></div>
-    <div class="gap-card red"><div class="num">${falta}</div><div class="label">✗ Falta</div></div>
-  `;
-
-  let detail='';
-  D.blockOrder.forEach(block=>{
-    const ns=D.nodes.filter(n=>n.block===block);
-    const docs=ns.filter(n=>n.type==='doc');
+  let t=0,ok=0,pr=0;
+  D.nodes.filter(n=>n.type==='doc').forEach(d=>{t++;const g=gs2(d.id);if(g==='s')ok++;else if(g==='p')pr++;});
+  const fl=t-ok-pr;
+  document.getElementById('gs').innerHTML=`
+    <div class="gc g"><div class="n">${ok}</div><div class="l2">✓ OK</div></div>
+    <div class="gc y"><div class="n">${pr}</div><div class="l2">~ Parcial</div></div>
+    <div class="gc r"><div class="n">${fl}</div><div class="l2">✗ Falta</div></div>`;
+  let h='';
+  D.blockOrder.forEach(b=>{
+    const ns=D.nodes.filter(n=>n.block===b);const docs=ns.filter(n=>n.type==='doc');
     const idx=ns.find(n=>n.type==='index');
-    let bok=0,bpar=0,btot=docs.length;
+    let bk=0,bp=0,bt=docs.length;
+    docs.forEach(d=>{const g=gs2(d.id);if(g==='s')bk++;else if(g==='p')bp++;});
+    const bpt=bt?Math.round((bk+bp*0.5)/bt*100):0;
+    const c=CH[b];
+    h+=`<div class="gb"><h4><div class="d" style="background:${c}"></div>${BN[b]}<span style="font-weight:400;color:rgba(255,255,255,.3);font-size:10px"> ${bk+bp}/${bt}</span></h4>
+      <div class="bw"><div class="bf" style="width:${bpt}%;background:${c}"></div></div>
+      <div class="bl2"><span>${bpt}%</span><span>${bk}/${bt} completos</span></div><div style="margin-top:6px">`;
     docs.forEach(d=>{
-      const st=getDocStatus(d.id);
-      if(st==='sim')bok++;else if(st==='parcial')bpar++;
+      const g=gs2(d.id);
+      const cl=g==='s'?'o':g==='p'?'p':'f';
+      const lb=g==='s'?'✓ OK':g==='p'?'~ Parcial':'✗ Falta';
+      h+=`<div class="gi"><div class="gd2" style="background:${cl==='o'?'#06D6A0':cl==='p'?'#FFBE0B':'#EF476F'}"></div><span class="gl">${d.label}</span><span class="gs2 ${cl}">${lb}</span></div>`;
     });
-    const bpct=btot?Math.round((bok+bpar*0.5)/btot*100):0;
-    const color=COLORS_HEX[block];
-    detail+=`<div class="gap-block">
-      <h4><div class="dot" style="background:${color}"></div>${BLOCK_NAMES[block]} <span style="font-weight:400;color:rgba(255,255,255,.35);font-size:11px">${bok+bpar}/${btot}</span></h4>
-      <div class="bar-wrap"><div class="bar-fill" style="width:${bpct}%;background:${color}"></div></div>
-      <div class="bar-label"><span>${bpct}%</span><span>${bk}/${btot} completos</span></div>
-      <div style="margin-top:8px">`;
-    docs.forEach(d=>{
-      const st=getDocStatus(d.id);
-      const cls=st==='sim'?'ok':st==='parcial'?'parcial':'falta';
-      const lbl=st==='sim'?'✓ OK':st==='parcial'?'~ Parcial':'✗ Falta';
-      detail+=`<div class="gap-item"><div class="g-dot" style="background:${cls==='ok'?'#06D6A0':cls==='parcial'?'#FFBE0B':'#EF476F'}"></div><span class="g-label">${d.label}</span><span class="g-status ${cls}">${lbl}</span></div>`;
-    });
-    detail+=`</div></div>`;
+    h+=`</div></div>`;
   });
-  document.getElementById('gap-detail').innerHTML=detail;
+  document.getElementById('gd').innerHTML=h;
 }
-
-function updateScoreBadge(){
-  let total=0,ok=0,par=0;
-  D.nodes.filter(n=>n.type==='doc').forEach(d=>{
-    total++;
-    const st=getDocStatus(d.id);
-    if(st==='sim')ok++;
-    else if(st==='parcial')par++;
-  });
-  const basePct=total?Math.round((ok+par*0.5)/total*100):0;
-  const realPct=total?Math.round(ok/total*100):0;
-  document.getElementById('score-badge').textContent=`BASE: ${basePct}% · REAL: ${realPct}%`;
-}
-
-// Init real state from localStorage
-setTimeout(updateScoreBadge, 100);
+setTimeout(updateScore,100);
 </script>
 </body>
 </html>
