@@ -178,6 +178,7 @@
   },
   "active": "10857c39cd95a325",
   "lastOpenFiles": [
+    "MDH_EMPRESA.html",
     "app/backend/sync_service.py",
     "app/backend/sync_script.py",
     "app/backend/settings.py",
@@ -188,7 +189,6 @@
     "app/backend/database.py",
     "app/backend/Procfile",
     "app/backend",
-    "app/frontend/style.css",
     "app/ARCHITECTURE.md",
     "09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO.md",
     "08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE.md",
