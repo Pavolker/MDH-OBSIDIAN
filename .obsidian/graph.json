@@ -27,6 +27,104 @@
         "a": 1,
         "rgb": 11657298
       }
+    },
+    {
+      "query": "path:\"EBOOKS\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 5423328
+      }
+    },
+    {
+      "query": "path:\"AGENTE BASEADO EM TAGS\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 12868320
+      }
+    },
+    {
+      "query": "path:\"ALGORITMO DA PERGUNTA\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 14730322
+      }
+    },
+    {
+      "query": "path:\"SOLUÇÕES  DA MDH\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 5435515
+      }
+    },
+    {
+      "query": "path:\"USOS IA DE PONTA\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 14711634
+      }
+    },
+    {
+      "query": "path:\"OBSIDIAN EMPRESA/01\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 3836671
+      }
+    },
+    {
+      "query": "path:\"OBSIDIAN EMPRESA/02\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 8599788
+      }
+    },
+    {
+      "query": "path:\"OBSIDIAN EMPRESA/03\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 16711790
+      }
+    },
+    {
+      "query": "path:\"OBSIDIAN EMPRESA/04\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 16474631
+      }
+    },
+    {
+      "query": "path:\"OBSIDIAN EMPRESA/05\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 16760843
+      }
+    },
+    {
+      "query": "path:\"OBSIDIAN EMPRESA/06\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 448160
+      }
+    },
+    {
+      "query": "path:\"OBSIDIAN EMPRESA/07\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 1150642
+      }
+    },
+    {
+      "query": "path:\"OBSIDIAN EMPRESA/08\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 15682927
+      }
+    },
+    {
+      "query": "path:\"OBSIDIAN EMPRESA/09\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 473932
+      }
     }
   ],
   "collapse-display": true,
@@ -39,6 +137,6 @@
   "repelStrength": 8.23611111111111,
   "linkStrength": 0.457638888888889,
   "linkDistance": 141,
-  "scale": 0.629583961659264,
+  "scale": 0.4408804873746853,
   "close": true
 }
