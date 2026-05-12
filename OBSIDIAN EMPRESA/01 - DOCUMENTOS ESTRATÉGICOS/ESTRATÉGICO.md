@@ -21,7 +21,7 @@ Documentos que definem a direção, o posicionamento e o modelo de operação da
 
 ## Conexões
 
-- [[03 - DOCUMENTOS FINANCEIROS/_Index|Documentos Financeiros]] — Orçamento e projeções financeiras
-- [[04 - DOCUMENTOS COMERCIAIS/_Index|Documentos Comerciais]] — Planos de marketing e vendas
-- [[07 - DOCUMENTOS DE PESSOAS/_Index|Pessoas e Governança]] — Estrutura organizacional
-- [[09 - DOCUMENTOS DE INOVAÇÃO/_Index|Inovação]] — Roadmap tecnológico
+- [[03 - DOCUMENTOS FINANCEIROS/FINANCEIRO|Documentos Financeiros]] — Orçamento e projeções financeiras
+- [[04 - DOCUMENTOS COMERCIAIS/COMERCIAL|Documentos Comerciais]] — Planos de marketing e vendas
+- [[07 - DOCUMENTOS DE PESSOAS/PESSOAS|Pessoas e Governança]] — Estrutura organizacional
+- [[09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO|Inovação]] — Roadmap tecnológico

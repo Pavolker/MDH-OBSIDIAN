@@ -1,7 +1,6 @@
 ---
 title: "OBSIDIAN EMPRESA — Mapa do Conhecimento Corporativo"
 tags:
-  - index
   - empresa
   - governance
 created: 2026-05-12
@@ -15,15 +14,15 @@ Estrutura padrão de documentos, planos e registros essenciais de uma empresa or
 
 | # | Bloco | Descrição |
 |---|-------|-----------|
-| 01 | [[01 - DOCUMENTOS ESTRATÉGICOS/_Index|Documentos Estratégicos]] | Business plan, planejamento estratégico, tático, operacional, BSC |
-| 02 | [[02 - DOCUMENTOS JURIDICOS/_Index|Documentos Jurídicos e Societários]] | Contrato social, acordo de sócios, compliance, LGPD |
-| 03 | [[03 - DOCUMENTOS FINANCEIROS/_Index|Documentos Financeiros]] | Planejamento financeiro, orçamento, demonstrativos, tributário |
-| 04 | [[04 - DOCUMENTOS COMERCIAIS/_Index|Documentos Comerciais e de Mercado]] | Marketing, comercial, pesquisa de mercado, política comercial |
-| 05 | [[05 - DOCUMENTOS OPERACIONAIS/_Index|Documentos Operacionais]] | Processos, POP, organograma, qualidade, ativos |
-| 06 | [[06 - DOCUMENTOS DE TECNOLOGIA/_Index|Documentos de Tecnologia e Sistemas]] | Arquitetura, requisitos, APIs, backup, segurança |
-| 07 | [[07 - DOCUMENTOS DE PESSOAS/_Index|Documentos de Pessoas e Governança]] | Cargos, manual, avaliação, capacitação, governança |
-| 08 | [[08 - DOCUMENTOS DE CONTINUIDADE/_Index|Documentos de Continuidade e Risco]] | Riscos, BCP, DRP, matriz de riscos |
-| 09 | [[09 - DOCUMENTOS DE INOVAÇÃO/_Index|Documentos de Inovação e Inteligência]] | Roadmap tecnológico, transformação digital, inteligência |
+| 01 | [[01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO|Documentos Estratégicos]] | Business plan, planejamento estratégico, tático, operacional, BSC |
+| 02 | [[02 - DOCUMENTOS JURIDICOS/JURÍDICO|Documentos Jurídicos e Societários]] | Contrato social, acordo de sócios, compliance, LGPD |
+| 03 | [[03 - DOCUMENTOS FINANCEIROS/FINANCEIRO|Documentos Financeiros]] | Planejamento financeiro, orçamento, demonstrativos, tributário |
+| 04 | [[04 - DOCUMENTOS COMERCIAIS/COMERCIAL|Documentos Comerciais e de Mercado]] | Marketing, comercial, pesquisa de mercado, política comercial |
+| 05 | [[05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL|Documentos Operacionais]] | Processos, POP, organograma, qualidade, ativos |
+| 06 | [[06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA|Documentos de Tecnologia e Sistemas]] | Arquitetura, requisitos, APIs, backup, segurança |
+| 07 | [[07 - DOCUMENTOS DE PESSOAS/PESSOAS|Documentos de Pessoas e Governança]] | Cargos, manual, avaliação, capacitação, governança |
+| 08 | [[08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE|Documentos de Continuidade e Risco]] | Riscos, BCP, DRP, matriz de riscos |
+| 09 | [[09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO|Documentos de Inovação e Inteligência]] | Roadmap tecnológico, transformação digital, inteligência |
 
 ## Estrutura Mínima Essencial (PME)
 

@@ -23,5 +23,5 @@ Registros da operação diária: processos, padrões, estrutura organizacional e
 ## Conexões
 
 - [[01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional|Plano Operacional]] — Diretrizes de execução
-- [[06 - DOCUMENTOS DE TECNOLOGIA/_Index|Tecnologia]] — Sistemas e infraestrutura
-- [[07 - DOCUMENTOS DE PESSOAS/_Index|Pessoas]] — Estrutura de cargos
+- [[06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA|Tecnologia]] — Sistemas e infraestrutura
+- [[07 - DOCUMENTOS DE PESSOAS/PESSOAS|Pessoas]] — Estrutura de cargos
