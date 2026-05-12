@@ -6,7 +6,71 @@
   "hideUnresolved": false,
   "showOrphans": true,
   "collapse-color-groups": true,
-  "colorGroups": [],
+  "colorGroups": [
+    {
+      "query": "path:\"01 - DOCUMENTOS ESTRATÉGICOS\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 3836671
+      }
+    },
+    {
+      "query": "path:\"02 - DOCUMENTOS JURIDICOS\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 8599788
+      }
+    },
+    {
+      "query": "path:\"03 - DOCUMENTOS FINANCEIROS\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 16711790
+      }
+    },
+    {
+      "query": "path:\"04 - DOCUMENTOS COMERCIAIS\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 16474631
+      }
+    },
+    {
+      "query": "path:\"05 - DOCUMENTOS OPERACIONAIS\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 16760843
+      }
+    },
+    {
+      "query": "path:\"06 - DOCUMENTOS DE TECNOLOGIA\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 448160
+      }
+    },
+    {
+      "query": "path:\"07 - DOCUMENTOS DE PESSOAS\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 1150642
+      }
+    },
+    {
+      "query": "path:\"08 - DOCUMENTOS DE CONTINUIDADE\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 15682927
+      }
+    },
+    {
+      "query": "path:\"09 - DOCUMENTOS DE INOVAÇÃO\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 473932
+      }
+    }
+  ],
   "collapse-display": true,
   "showArrow": false,
   "textFadeMultiplier": 0,
