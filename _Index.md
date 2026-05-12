@@ -19,6 +19,21 @@ Arquitetura conceitual da simbiose Humano-IA: Mapa de Fronteiras, Dimensões, ap
 ## [[TECNOLOGIA DE PROPOSITO GERAL/_Index TPG|⚙️ TECNOLOGIA DE PROPÓSITO GERAL]]
 Fundamentos estratégicos, conceitos e aplicações da TPG em educação e empresas.
 
+## [[EBOOKS/_Index Ebooks|📚 EBOOKS]]
+E-books dos desafios temáticos: competências, questionamento, estratégia, humano e time Centauro.
+
+## [[AGENTE BASEADO EM TAGS/_Index Agente Tags|🏷️ AGENTE BASEADO EM TAGS]]
+Arquitetura do AIID — Agente de IA por Indução Dialógica baseado em tags, tipos ideais e inferência adaptativa.
+
+## [[ALGORITMO DA PERGUNTA/_Index Algoritmo Pergunta|❓ ALGORITMO DA PERGUNTA]]
+Box de 4 livros sobre o poder transformador das perguntas: Platão, Estratégia, SHIM, Filosofia do Prompt.
+
+## [[SOLUÇÕES  DA MDH/_Index Soluções MDH|🛠️ SOLUÇÕES MDH]]
+Serviços: consultoria, mentorias, oficinas e palestras baseadas nos frameworks Centauro.
+
+## [[USOS IA DE PONTA/_Index Usos IA|🚀 USOS IA DE PONTA]]
+Ideias e aplicações inovadoras de IA ainda não exploradas em escala.
+
 ---
 
 > [!info] Navegação

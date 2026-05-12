@@ -18,6 +18,12 @@ Arquitetura conceitual que organiza a relação simbiótica entre humanos e inte
 - [[Jornada Centauro - Funil de Inteligência Estratégica]] — Proposta de integração dos apps em um funil de consultoria automatizada.
 - [[Minuta de NDA - Foco Tecnológico]] — Acordo de confidencialidade e transferência tecnológica.
 
+## Documentos Complementares
+
+- [[SISTEMA CENTAURO/FUNDAMENTACAO_SISTEMA_CENTAURO|Fundamentação Conceitual]] — Framework completo de Simbiose Humano-IA (dimensões, apps, maturidade, fluxos).
+- [[SISTEMA CENTAURO/SISTEMA_CENTAURO_APRESENTACAO|Kit de Comunicação]] — Apresentação do Sistema Centauro em 3 camadas (30s, 3min, 30min).
+- [[SISTEMA CENTAURO/app/_Index Apps Centauro|Apps — Documentação Técnica]] — Descrição e análise técnica dos aplicativos.
+
 ## Conexões
 
 - [[CENTAURO CORP/_Index Centauro Corp|Centauro Corp]] — A plataforma corporativa que implementa os conceitos do Sistema.
