@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O Cérebro | Cofres Conectados</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container glass-effect">
+        
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#paint0_linear)"/>
+                    <path d="M2 17L12 22L22 17" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="paint0_linear" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#D97757" />
+                            <stop offset="1" stop-color="#9A56E2" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span>O Cérebro</span>
+            </div>
+            
+            <div class="menu">
+                <button class="menu-item active" data-view="discover">
+                    <span class="icon">🔍</span> Descobrir
+                </button>
+                <button class="menu-item" data-view="chat">
+                    <span class="icon">✨</span> Converse com IA
+                </button>
+            </div>
+            
+            <div class="vault-stats">
+                <p>Status do Cofre</p>
+                <h4 id="stat-chunks">Carregando...</h4>
+                <small>bloques indexados</small>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- View: Descobrir (Busca) -->
+            <section id="view-discover" class="view active-view">
+                <header class="header">
+                    <h1>Sua Base de Conhecimento</h1>
+                    <p>Navegue pelos vaults, abra notas e use busca semântica quando precisar.</p>
+                </header>
+                
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Descreva o que você está procurando...">
+                    <button id="searchBtn">Buscar</button>
+                </div>
+
+                <div class="results-container" id="resultsContainer">
+                    <div class="empty-state">Use a busca para encontrar notas por significado.</div>
+                </div>
+
+                <div class="discover-shell">
+                    <aside class="library-panel">
+                        <div class="panel-card">
+                            <div class="panel-header">
+                                <h3>Vaults</h3>
+                                <button class="link-button" id="clearVaultFilterBtn" type="button">Todos</button>
+                            </div>
+                            <div class="vault-list" id="vaultList"></div>
+                        </div>
+
+                        <div class="panel-card">
+                            <div class="panel-header">
+                                <h3>Documentos</h3>
+                                <span id="documentCountLabel">0</span>
+                            </div>
+                            <div class="document-list" id="documentList"></div>
+                        </div>
+                    </aside>
+
+                    <section class="reader-panel">
+                        <div class="reader-card" id="documentReader">
+                            <div class="empty-state">
+                                Selecione um documento para ler o conteúdo completo.
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <!-- View: Chat (RAG) -->
+            <section id="view-chat" class="view">
+                <header class="header">
+                    <h1>Assistente O Cérebro</h1>
+                    <p>Faça perguntas difíceis e a IA responderá conectando os pontos das suas próprias anotações.</p>
+                </header>
+                
+                <div class="chat-container">
+                    <div class="chat-history" id="chatHistory">
+                        <div class="message ai-message">
+                            <div class="avatar">✨</div>
+                            <div class="bubble">Olá! Consigo acessar e raciocinar sobre todos os seus cofres. O que vamos explorar hoje?</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <textarea id="chatInput" placeholder="Faça uma pergunta sobre suas notas..." rows="2"></textarea>
+                        <button id="sendMessageBtn">
+                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                               <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+                           </svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Graph / Context Panel Lateral (Opcional, escondido pra versão leve por enquanto) -->
+        <aside class="context-panel" style="display: none;">
+            <h3>Conexões</h3>
+            <div id="graphContainer" class="graph-box"></div>
+        </aside>
+
+    </div>
+    
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
