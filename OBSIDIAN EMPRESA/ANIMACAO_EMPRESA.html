@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>OBSIDIAN EMPRESA — Mapa Corporativo</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#eee;overflow:hidden;height:100vh}
+#graph{width:100%;height:100vh}
+#controls{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:20px;background:rgba(26,26,46,0.92);backdrop-filter:blur(12px);padding:14px 28px;border-radius:16px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 8px 32px rgba(0,0,0,0.6);z-index:100}
+#controls button{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:.2s}
+#controls button:hover{background:rgba(255,255,255,0.2)}
+#controls button:disabled{opacity:0.3;cursor:default}
+#status{font-size:13px;color:rgba(255,255,255,0.6);min-width:200px;text-align:center}
+#progress-container{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.05);z-index:200}
+#progress-bar{height:100%;background:linear-gradient(90deg,#3A86FF,#8338EC,#FF006E,#FB5607,#FFBE0B,#06D6A0,#118AB2,#EF476F,#073B4C);width:0%;transition:width 0.4s ease}
+#legend{position:fixed;right:24px;top:50%;transform:translateY(-50%);background:rgba(26,26,46,0.88);backdrop-filter:blur(8px);padding:16px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);font-size:12px;z-index:100;min-width:140px}
+#legend .legend-item{display:flex;align-items:center;gap:8px;padding:3px 0;opacity:0.4;transition:.3s;cursor:pointer}
+#legend .legend-item.active{opacity:1}
+#legend .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+#legend .legend-label{color:rgba(255,255,255,0.7);white-space:nowrap}
+#header{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100;text-align:center}
+#header h1{font-size:16px;font-weight:600;color:#fff;letter-spacing:0.3px}
+#header span{font-size:11px;color:rgba(255,255,255,0.35)}
+.node-label{font-size:10px;pointer-events:none;font-weight:500;text-shadow:0 1px 4px rgba(0,0,0,0.7);opacity:0;transition:opacity 0.3s}
+.node.visible .node-label{opacity:1}
+.node circle{transition:r 0.4s ease,opacity 0.4s ease}
+.link{stroke-opacity:0;transition:stroke-opacity 0.5s ease}
+.link.visible{stroke-opacity:0.25}
+#speed-label{font-size:12px;color:rgba(255,255,255,0.4)}
+input[type=range]{width:70px;height:4px;-webkit-appearance:none;background:rgba(255,255,255,0.15);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;cursor:pointer}
+#controls .btn-icon{font-size:18px;line-height:1;padding:6px 12px}
+</style>
+</head>
+<body>
+<div id="progress-container"><div id="progress-bar"></div></div>
+<div id="header"><h1>OBSIDIAN EMPRESA</h1><span>Mapa Corporativo — Estrutura Documental</span></div>
+<div id="graph"></div>
+<div id="legend"></div>
+<div id="controls">
+<button id="btn-play" class="btn-icon">▶</button>
+<button id="btn-reset">↺</button>
+<button id="btn-prev">◀</button>
+<button id="btn-next">▶▶</button>
+<span id="speed-label">Velocidade</span>
+<input type="range" id="speed-slider" min="1" max="10" value="4" step="1">
+<span id="status">Aguardando...</span>
+</div>
+<script>
+const DATA = {"nodes":[{"id":"EMPRESA","label":"EMPRESA","block":"RAIZ","type":"root","blockNum":"00"},{"id":"02 - DOCUMENTOS JURIDICOS/Política de LGPD","label":"Política de LGPD","block":"02 - DOCUMENTOS JURIDICOS","type":"doc","blockNum":"02"},{"id":"02 - DOCUMENTOS JURIDICOS/Acordo de Sócios","label":"Acordo de Sócios","block":"02 - DOCUMENTOS JURIDICOS","type":"doc","blockNum":"02"},{"id":"02 - DOCUMENTOS JURIDICOS/Contrato Social","label":"Contrato Social","block":"02 - DOCUMENTOS JURIDICOS","type":"doc","blockNum":"02"},{"id":"02 - DOCUMENTOS JURIDICOS/Licenças e Registros","label":"Licenças e Registros","block":"02 - DOCUMENTOS JURIDICOS","type":"doc","blockNum":"02"},{"id":"02 - DOCUMENTOS JURIDICOS/Política de Compliance","label":"Política de Compliance","block":"02 - DOCUMENTOS JURIDICOS","type":"doc","blockNum":"02"},{"id":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","label":"JURÍDICO","block":"02 - DOCUMENTOS JURIDICOS","type":"index","blockNum":"02"},{"id":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial","label":"Plano Comercial","block":"04 - DOCUMENTOS COMERCIAIS","type":"doc","blockNum":"04"},{"id":"04 - DOCUMENTOS COMERCIAIS/Política Comercial","label":"Política Comercial","block":"04 - DOCUMENTOS COMERCIAIS","type":"doc","blockNum":"04"},{"id":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado","label":"Pesquisa de Mercado","block":"04 - DOCUMENTOS COMERCIAIS","type":"doc","blockNum":"04"},{"id":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","label":"COMERCIAL","block":"04 - DOCUMENTOS COMERCIAIS","type":"index","blockNum":"04"},{"id":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing","label":"Plano de Marketing","block":"04 - DOCUMENTOS COMERCIAIS","type":"doc","blockNum":"04"},{"id":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro","label":"Planejamento Financeiro","block":"03 - DOCUMENTOS FINANCEIROS","type":"doc","blockNum":"03"},{"id":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","label":"FINANCEIRO","block":"03 - DOCUMENTOS FINANCEIROS","type":"index","blockNum":"03"},{"id":"03 - DOCUMENTOS FINANCEIROS/Orçamento Empresarial","label":"Orçamento Empresarial","block":"03 - DOCUMENTOS FINANCEIROS","type":"doc","blockNum":"03"},{"id":"03 - DOCUMENTOS FINANCEIROS/Plano Tributário","label":"Plano Tributário","block":"03 - DOCUMENTOS FINANCEIROS","type":"doc","blockNum":"03"},{"id":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros","label":"Demonstrativos Financeiros","block":"03 - DOCUMENTOS FINANCEIROS","type":"doc","blockNum":"03"},{"id":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação","label":"Plano de Capacitação","block":"07 - DOCUMENTOS DE PESSOAS","type":"doc","blockNum":"07"},{"id":"07 - DOCUMENTOS DE PESSOAS/Avaliação de Desempenho","label":"Avaliação de Desempenho","block":"07 - DOCUMENTOS DE PESSOAS","type":"doc","blockNum":"07"},{"id":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador","label":"Manual do Colaborador","block":"07 - DOCUMENTOS DE PESSOAS","type":"doc","blockNum":"07"},{"id":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários","label":"Plano de Cargos e Salários","block":"07 - DOCUMENTOS DE PESSOAS","type":"doc","blockNum":"07"},{"id":"07 - DOCUMENTOS DE PESSOAS/Política de Governança","label":"Política de Governança","block":"07 - DOCUMENTOS DE PESSOAS","type":"doc","blockNum":"07"},{"id":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","label":"PESSOAS","block":"07 - DOCUMENTOS DE PESSOAS","type":"index","blockNum":"07"},{"id":"05 - DOCUMENTOS OPERACIONAIS/Plano de Qualidade","label":"Plano de Qualidade","block":"05 - DOCUMENTOS OPERACIONAIS","type":"doc","blockNum":"05"},{"id":"05 - DOCUMENTOS OPERACIONAIS/POP","label":"POP","block":"05 - DOCUMENTOS OPERACIONAIS","type":"doc","blockNum":"05"},{"id":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos","label":"Inventário de Ativos","block":"05 - DOCUMENTOS OPERACIONAIS","type":"doc","blockNum":"05"},{"id":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos","label":"Manual de Processos","block":"05 - DOCUMENTOS OPERACIONAIS","type":"doc","blockNum":"05"},{"id":"05 - DOCUMENTOS OPERACIONAIS/Organograma","label":"Organograma","block":"05 - DOCUMENTOS OPERACIONAIS","type":"doc","blockNum":"05"},{"id":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","label":"OPERACIONAL","block":"05 - DOCUMENTOS OPERACIONAIS","type":"index","blockNum":"05"},{"id":"09 - DOCUMENTOS DE INOVAÇÃO/Relatórios de Inteligência Competitiva","label":"Relatórios de Inteligência Competitiva","block":"09 - DOCUMENTOS DE INOVAÇÃO","type":"doc","blockNum":"09"},{"id":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","label":"INOVAÇÃO","block":"09 - DOCUMENTOS DE INOVAÇÃO","type":"index","blockNum":"09"},{"id":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital","label":"Plano de Transformação Digital","block":"09 - DOCUMENTOS DE INOVAÇÃO","type":"doc","blockNum":"09"},{"id":"09 - DOCUMENTOS DE INOVAÇÃO/Frameworks Metodológicos","label":"Frameworks Metodológicos","block":"09 - DOCUMENTOS DE INOVAÇÃO","type":"doc","blockNum":"09"},{"id":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico","label":"Roadmap Tecnológico","block":"09 - DOCUMENTOS DE INOVAÇÃO","type":"doc","blockNum":"09"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas","label":"Arquitetura de Sistemas","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação","label":"Plano de Backup e Recuperação","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Documento Funcional FSD","label":"Documento Funcional FSD","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","label":"TECNOLOGIA","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"index","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Documentação de APIs","label":"Documentação de APIs","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação","label":"Plano de Segurança da Informação","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"06 - DOCUMENTOS DE TECNOLOGIA/Documento de Requisitos SRS","label":"Documento de Requisitos SRS","block":"06 - DOCUMENTOS DE TECNOLOGIA","type":"doc","blockNum":"06"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","label":"ESTRATÉGICO","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"index","blockNum":"01"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico","label":"Planejamento Estratégico","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"doc","blockNum":"01"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático","label":"Plano Tático","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"doc","blockNum":"01"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios","label":"Plano de Negócios","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"doc","blockNum":"01"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC","label":"Mapa Estratégico BSC","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"doc","blockNum":"01"},{"id":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional","label":"Plano Operacional","block":"01 - DOCUMENTOS ESTRATÉGICOS","type":"doc","blockNum":"01"},{"id":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","label":"CONTINUIDADE","block":"08 - DOCUMENTOS DE CONTINUIDADE","type":"index","blockNum":"08"},{"id":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos","label":"Matriz de Riscos","block":"08 - DOCUMENTOS DE CONTINUIDADE","type":"doc","blockNum":"08"},{"id":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP","label":"Plano de Continuidade BCP","block":"08 - DOCUMENTOS DE CONTINUIDADE","type":"doc","blockNum":"08"},{"id":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos","label":"Gestão de Riscos","block":"08 - DOCUMENTOS DE CONTINUIDADE","type":"doc","blockNum":"08"},{"id":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP","label":"Plano de Recuperação DRP","block":"08 - DOCUMENTOS DE CONTINUIDADE","type":"doc","blockNum":"08"}],"edges":[{"source":"EMPRESA","target":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO"},{"source":"EMPRESA","target":"02 - DOCUMENTOS JURIDICOS/JURÍDICO"},{"source":"EMPRESA","target":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO"},{"source":"EMPRESA","target":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL"},{"source":"EMPRESA","target":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL"},{"source":"EMPRESA","target":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA"},{"source":"EMPRESA","target":"07 - DOCUMENTOS DE PESSOAS/PESSOAS"},{"source":"EMPRESA","target":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE"},{"source":"EMPRESA","target":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO"},{"source":"EMPRESA","target":"02 - DOCUMENTOS JURIDICOS/Contrato Social"},{"source":"EMPRESA","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"EMPRESA","target":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro"},{"source":"EMPRESA","target":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial"},{"source":"EMPRESA","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional"},{"source":"EMPRESA","target":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros"},{"source":"EMPRESA","target":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos"},{"source":"EMPRESA","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"EMPRESA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"EMPRESA","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de LGPD","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de LGPD","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de LGPD","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"02 - DOCUMENTOS JURIDICOS/Acordo de Sócios","target":"02 - DOCUMENTOS JURIDICOS/Contrato Social"},{"source":"02 - DOCUMENTOS JURIDICOS/Acordo de Sócios","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"02 - DOCUMENTOS JURIDICOS/Acordo de Sócios","target":"07 - DOCUMENTOS DE PESSOAS/Política de Governança"},{"source":"02 - DOCUMENTOS JURIDICOS/Contrato Social","target":"02 - DOCUMENTOS JURIDICOS/Licenças e Registros"},{"source":"02 - DOCUMENTOS JURIDICOS/Contrato Social","target":"07 - DOCUMENTOS DE PESSOAS/Política de Governança"},{"source":"02 - DOCUMENTOS JURIDICOS/Licenças e Registros","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"02 - DOCUMENTOS JURIDICOS/Licenças e Registros","target":"03 - DOCUMENTOS FINANCEIROS/Plano Tributário"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de Compliance","target":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de Compliance","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"02 - DOCUMENTOS JURIDICOS/Política de Compliance","target":"02 - DOCUMENTOS JURIDICOS/Contrato Social"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"02 - DOCUMENTOS JURIDICOS/Contrato Social"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"02 - DOCUMENTOS JURIDICOS/Acordo de Sócios"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"02 - DOCUMENTOS JURIDICOS/Licenças e Registros"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"02 - DOCUMENTOS JURIDICOS/Política de LGPD"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"07 - DOCUMENTOS DE PESSOAS/Política de Governança"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"02 - DOCUMENTOS JURIDICOS/JURÍDICO","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação"},{"source":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial","target":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing"},{"source":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial","target":"04 - DOCUMENTOS COMERCIAIS/Política Comercial"},{"source":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial","target":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado"},{"source":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial","target":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro"},{"source":"04 - DOCUMENTOS COMERCIAIS/Política Comercial","target":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing"},{"source":"04 - DOCUMENTOS COMERCIAIS/Política Comercial","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado","target":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing"},{"source":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado","target":"09 - DOCUMENTOS DE INOVAÇÃO/Relatórios de Inteligência Competitiva"},{"source":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"04 - DOCUMENTOS COMERCIAIS/Pesquisa de Mercado"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"04 - DOCUMENTOS COMERCIAIS/Política Comercial"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL","target":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro"},{"source":"04 - DOCUMENTOS COMERCIAIS/Plano de Marketing","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro","target":"03 - DOCUMENTOS FINANCEIROS/Orçamento Empresarial"},{"source":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro","target":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros"},{"source":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro","target":"03 - DOCUMENTOS FINANCEIROS/Plano Tributário"},{"source":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"03 - DOCUMENTOS FINANCEIROS/Orçamento Empresarial"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"03 - DOCUMENTOS FINANCEIROS/Plano Tributário"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"03 - DOCUMENTOS FINANCEIROS/Orçamento Empresarial","target":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros"},{"source":"03 - DOCUMENTOS FINANCEIROS/Orçamento Empresarial","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"03 - DOCUMENTOS FINANCEIROS/Plano Tributário","target":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros"},{"source":"03 - DOCUMENTOS FINANCEIROS/Demonstrativos Financeiros","target":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC"},{"source":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação","target":"07 - DOCUMENTOS DE PESSOAS/Avaliação de Desempenho"},{"source":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários"},{"source":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação","target":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital"},{"source":"07 - DOCUMENTOS DE PESSOAS/Avaliação de Desempenho","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários"},{"source":"07 - DOCUMENTOS DE PESSOAS/Avaliação de Desempenho","target":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC"},{"source":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários"},{"source":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação"},{"source":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários","target":"05 - DOCUMENTOS OPERACIONAIS/Organograma"},{"source":"07 - DOCUMENTOS DE PESSOAS/Política de Governança","target":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador"},{"source":"07 - DOCUMENTOS DE PESSOAS/Política de Governança","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Cargos e Salários"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"07 - DOCUMENTOS DE PESSOAS/Avaliação de Desempenho"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"07 - DOCUMENTOS DE PESSOAS/Plano de Capacitação"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"07 - DOCUMENTOS DE PESSOAS/Política de Governança"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"05 - DOCUMENTOS OPERACIONAIS/Organograma"},{"source":"07 - DOCUMENTOS DE PESSOAS/PESSOAS","target":"02 - DOCUMENTOS JURIDICOS/Política de Compliance"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Plano de Qualidade","target":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Plano de Qualidade","target":"05 - DOCUMENTOS OPERACIONAIS/POP"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Plano de Qualidade","target":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/POP","target":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/POP","target":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos","target":"05 - DOCUMENTOS OPERACIONAIS/Organograma"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional"},{"source":"05 - DOCUMENTOS OPERACIONAIS/Organograma","target":"07 - DOCUMENTOS DE PESSOAS/Manual do Colaborador"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"05 - DOCUMENTOS OPERACIONAIS/Manual de Processos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"05 - DOCUMENTOS OPERACIONAIS/POP"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"05 - DOCUMENTOS OPERACIONAIS/Organograma"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"05 - DOCUMENTOS OPERACIONAIS/Plano de Qualidade"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA"},{"source":"05 - DOCUMENTOS OPERACIONAIS/OPERACIONAL","target":"07 - DOCUMENTOS DE PESSOAS/PESSOAS"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Relatórios de Inteligência Competitiva","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Relatórios de Inteligência Competitiva","target":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"09 - DOCUMENTOS DE INOVAÇÃO/Relatórios de Inteligência Competitiva"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"09 - DOCUMENTOS DE INOVAÇÃO/Frameworks Metodológicos"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital","target":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Frameworks Metodológicos","target":"09 - DOCUMENTOS DE INOVAÇÃO/Plano de Transformação Digital"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Frameworks Metodológicos","target":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Frameworks Metodológicos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documento de Requisitos SRS"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documentação de APIs"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Documento Funcional FSD","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documento de Requisitos SRS"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Documento Funcional FSD","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Documento Funcional FSD","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documentação de APIs"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documento de Requisitos SRS"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documento Funcional FSD"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documentação de APIs"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"05 - DOCUMENTOS OPERACIONAIS/Inventário de Ativos"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/TECNOLOGIA","target":"09 - DOCUMENTOS DE INOVAÇÃO/Roadmap Tecnológico"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Documentação de APIs","target":"06 - DOCUMENTOS DE TECNOLOGIA/Documento de Requisitos SRS"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"03 - DOCUMENTOS FINANCEIROS/FINANCEIRO"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"04 - DOCUMENTOS COMERCIAIS/COMERCIAL"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"07 - DOCUMENTOS DE PESSOAS/PESSOAS"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/ESTRATÉGICO","target":"09 - DOCUMENTOS DE INOVAÇÃO/INOVAÇÃO"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico","target":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Planejamento Estratégico","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático","target":"04 - DOCUMENTOS COMERCIAIS/Plano Comercial"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Plano de Negócios","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Mapa Estratégico BSC","target":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Tático"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional","target":"05 - DOCUMENTOS OPERACIONAIS/POP"},{"source":"01 - DOCUMENTOS ESTRATÉGICOS/Plano Operacional","target":"05 - DOCUMENTOS OPERACIONAIS/Organograma"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Backup e Recuperação"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"06 - DOCUMENTOS DE TECNOLOGIA/Plano de Segurança da Informação"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/CONTINUIDADE","target":"03 - DOCUMENTOS FINANCEIROS/Planejamento Financeiro"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Matriz de Riscos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP","target":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Continuidade BCP","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Gestão de Riscos","target":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP"},{"source":"08 - DOCUMENTOS DE CONTINUIDADE/Plano de Recuperação DRP","target":"06 - DOCUMENTOS DE TECNOLOGIA/Arquitetura de Sistemas"}],"blockOrder":["01 - DOCUMENTOS ESTRATÉGICOS","02 - DOCUMENTOS JURIDICOS","03 - DOCUMENTOS FINANCEIROS","04 - DOCUMENTOS COMERCIAIS","05 - DOCUMENTOS OPERACIONAIS","06 - DOCUMENTOS DE TECNOLOGIA","07 - DOCUMENTOS DE PESSOAS","08 - DOCUMENTOS DE CONTINUIDADE","09 - DOCUMENTOS DE INOVAÇÃO"],"colors":{"RAIZ":"#4A4A4A","01 - DOCUMENTOS ESTRATÉGICOS":"#3A86FF","02 - DOCUMENTOS JURIDICOS":"#8338EC","03 - DOCUMENTOS FINANCEIROS":"#FF006E","04 - DOCUMENTOS COMERCIAIS":"#FB5607","05 - DOCUMENTOS OPERACIONAIS":"#FFBE0B","06 - DOCUMENTOS DE TECNOLOGIA":"#06D6A0","07 - DOCUMENTOS DE PESSOAS":"#118AB2","08 - DOCUMENTOS DE CONTINUIDADE":"#EF476F","09 - DOCUMENTOS DE INOVAÇÃO":"#073B4C"}};
+
+const W = window.innerWidth, H = window.innerHeight;
+const COLORS = DATA.colors;
+const BLOCK_ORDER = DATA.blockOrder;
+const nodesMap = {};
+const edgeMap = {};
+
+DATA.nodes.forEach(n => { nodesMap[n.id] = n; n.__visible = false; });
+DATA.edges.forEach(e => {
+  const k = e.source + '|' + e.target;
+  edgeMap[k] = e;
+  e.__visible = false;
+});
+
+const svg = d3.select('#graph').append('svg').attr('width',W).attr('height',H);
+const g = svg.append('g');
+
+svg.call(d3.zoom().scaleExtent([0.2,4]).on('zoom',(e)=>g.attr('transform',e.transform)));
+
+const linkGroup = g.append('g').attr('class','links');
+const nodeGroup = g.append('g').attr('class','nodes');
+
+const simulation = d3.forceSimulation(DATA.nodes)
+  .force('link', d3.forceLink(DATA.edges).id(d=>d.id).distance(90).strength(0.3))
+  .force('charge', d3.forceManyBody().strength(-280))
+  .force('center', d3.forceCenter(W/2,H/2))
+  .force('collision', d3.forceCollide(22))
+  .stop();
+
+const link = linkGroup.selectAll('line').data(DATA.edges).join('line')
+  .attr('class','link').attr('stroke','#aaa').attr('stroke-width',1);
+
+const node = nodeGroup.selectAll('g.node').data(DATA.nodes).join('g').attr('class','node')
+  .attr('opacity',0).call(d3.drag()
+    .on('start',(e,d)=>simulation.alphaTarget(0.3).restart())
+    .on('drag',(e,d)=>{d.x=e.x;d.y=e.y})
+    .on('end',(e,d)=>simulation.alphaTarget(0)))
+  .on('mouseenter',function(e,d){d3.select(this).select('circle').attr('r',d.__r*1.4)})
+  .on('mouseleave',function(e,d){d3.select(this).select('circle').attr('r',d.__r)});
+
+node.append('circle').attr('r',0).attr('fill',d=>COLORS[d.block]||'#666');
+node.append('text').attr('class','node-label').attr('text-anchor','middle')
+  .attr('dy','0.35em').text(d=>d.label);
+
+// Legend
+const LEGEND_ITEMS = [{id:'RAIZ',name:'EMPRESA',color:'#4A4A4A'}];
+BLOCK_ORDER.forEach(b=>{LEGEND_ITEMS.push({id:b,name:d=>b.substring(b.indexOf(' ')+1),color:COLORS[b]})});
+const legendDiv = d3.select('#legend');
+LEGEND_ITEMS.forEach(item=>{
+  const name = typeof item.name === 'function' ? item.name(item) : item.name;
+  const div = legendDiv.append('div').attr('class','legend-item')
+    .attr('data-block',item.id)
+    .on('click',()=>skipToBlock(item.id));
+  div.append('div').attr('class','legend-dot').style('background',item.color);
+  div.append('span').attr('class','legend-label').text(name);
+});
+
+let animationState = 'stopped';
+let currentStep = 0;
+let animTimer = null;
+const nodeQueue = [];
+
+function buildQueue() {
+  nodeQueue.length = 0;
+  nodeQueue.push('EMPRESA');
+  BLOCK_ORDER.forEach(block => {
+    const blockNodes = DATA.nodes.filter(n => n.block === block);
+    const idx = blockNodes.find(n => n.type === 'index');
+    if (idx) nodeQueue.push(idx.id);
+    blockNodes.filter(n => n.type === 'doc').forEach(n => nodeQueue.push(n.id));
+  });
+}
+buildQueue();
+
+function getSpeed() { return parseInt(document.getElementById('speed-slider').value); }
+function delay() { return Math.max(150, 800 - getSpeed() * 65); }
+
+function showNode(id) {
+  const n = nodesMap[id];
+  if (!n || n.__visible) return;
+  n.__visible = true;
+  const radius = n.type === 'root' ? 28 : n.type === 'index' ? 22 : 14;
+  n.__r = radius;
+  const el = node.filter(d => d.id === id);
+  el.attr('opacity',1).select('circle').attr('r',0).transition().duration(400).attr('r',radius);
+  el.select('text').style('opacity',0).transition().delay(200).duration(300).style('opacity',1);
+  
+  DATA.edges.forEach(e => {
+    const s = typeof e.source === 'object' ? e.source.id : e.source;
+    const t = typeof e.target === 'object' ? e.target.id : e.target;
+    if ((s === id || t === id) && nodesMap[s] && nodesMap[t] && nodesMap[s].__visible && nodesMap[t].__visible) {
+      e.__visible = true;
+    }
+  });
+  updateEdges();
+}
+
+function updateEdges() {
+  link.classed('visible', d => d.__visible);
+  simulation.alpha(0.3).restart();
+}
+
+function updateProgress() {
+  const total = nodeQueue.length;
+  const visible = nodeQueue.filter(id => nodesMap[id] && nodesMap[id].__visible).length;
+  const pct = Math.min(100, (visible / total) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  
+  const currentBlock = visible > 0 ? (nodesMap[nodeQueue[Math.min(visible-1,nodeQueue.length-1)]]?.block||'') : '';
+  const blockName = currentBlock ? (currentBlock.substring(currentBlock.indexOf(' ')+1)||currentBlock) : '';
+  const status = document.getElementById('status');
+  if (visible >= total) {
+    status.textContent = '✅ Completo — ' + total + ' notas';
+  } else {
+    status.textContent = (visible+1) + '/' + total + ' — ' + blockName;
+  }
+  
+  LEGEND_ITEMS.forEach(item => {
+    const blockId = item.id;
+    const visibleInBlock = DATA.nodes.filter(n => n.block === blockId).every(n => n.__visible || !n.block || n.block === 'RAIZ');
+    d3.select('#legend').selectAll('.legend-item').filter(d => d.id === blockId)
+      .classed('active', visibleInBlock || blockId === 'RAIZ');
+  });
+}
+
+function stepForward() {
+  if (currentStep >= nodeQueue.length) { stopAnimation(); return; }
+  const id = nodeQueue[currentStep];
+  showNode(id);
+  currentStep++;
+  updateProgress();
+  if (currentStep >= nodeQueue.length) { stopAnimation(); }
+}
+
+function skipToBlock(blockId) {
+  stopAnimation();
+  if (blockId === 'RAIZ') {
+    DATA.nodes.forEach(n => { n.__visible = true; const el=node.filter(d=>d.id===n.id); el.attr('opacity',1).select('circle').attr('r',n.__r||14); });
+    DATA.edges.forEach(e => e.__visible = true);
+    currentStep = nodeQueue.length;
+  } else {
+    let found = false;
+    nodeQueue.forEach((id,i) => {
+      const n = nodesMap[id];
+      if (n && n.block === blockId && !found) { found = true; currentStep = i; }
+    });
+    for (let i = 0; i < currentStep; i++) showNode(nodeQueue[i]);
+    showNode(nodeQueue[currentStep]);
+    currentStep++;
+  }
+  updateEdges();
+  updateProgress();
+}
+
+function startAnimation() {
+  if (animTimer) return;
+  animationState = 'playing';
+  document.getElementById('btn-play').textContent = '⏸';
+  function tick() {
+    if (currentStep < nodeQueue.length) {
+      stepForward();
+      if (currentStep < nodeQueue.length) {
+        animTimer = setTimeout(tick, delay());
+      }
+    } else {
+      stopAnimation();
+    }
+  }
+  tick();
+}
+
+function stopAnimation() {
+  if (animTimer) { clearTimeout(animTimer); animTimer = null; }
+  animationState = 'stopped';
+  document.getElementById('btn-play').textContent = '▶';
+}
+
+function resetAnimation() {
+  stopAnimation();
+  DATA.nodes.forEach(n => { n.__visible = false; });
+  DATA.edges.forEach(e => { e.__visible = false; });
+  node.attr('opacity',0).select('circle').attr('r',0);
+  link.classed('visible', false);
+  currentStep = 0;
+  updateProgress();
+  document.getElementById('progress-bar').style.width = '0%';
+  document.getElementById('status').textContent = '0/' + nodeQueue.length;
+}
+
+function goNext() { stopAnimation(); if (currentStep < nodeQueue.length) { stepForward(); } }
+function goPrev() {
+  stopAnimation();
+  if (currentStep > 0) {
+    currentStep = Math.max(0, currentStep - 2);
+    resetAnimation();
+    for (let i = 0; i <= currentStep && i < nodeQueue.length; i++) showNode(nodeQueue[i]);
+    currentStep++;
+    updateProgress();
+  }
+}
+
+document.getElementById('btn-play').addEventListener('click',()=>{
+  if (animationState === 'playing') stopAnimation();
+  else { if (currentStep >= nodeQueue.length) resetAnimation(); startAnimation(); }
+});
+document.getElementById('btn-reset').addEventListener('click',resetAnimation);
+document.getElementById('btn-prev').addEventListener('click',goPrev);
+document.getElementById('btn-next').addEventListener('click',goNext);
+
+simulation.alpha(1).restart();
+for (let i = 0; i < 300; i++) simulation.tick();
+simulation.stop();
+
+simulation.on('tick',()=>{
+  link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+  node.attr('transform',d=>'translate('+d.x+','+d.y+')');
+});
+
+// Show initial EMPRESA node
+resetAnimation();
+currentStep = 0;
+showNode('EMPRESA');
+currentStep = 1;
+updateProgress();
+document.getElementById('status').textContent = '1/' + nodeQueue.length + ' — EMPRESA';
+
+window.addEventListener('resize',()=>{
+  svg.attr('width',window.innerWidth).attr('height',window.innerHeight);
+  simulation.force('center',d3.forceCenter(window.innerWidth/2,window.innerHeight/2));
+  simulation.alpha(0.3).restart();
+});
+</script>
+</body>
+</html>
