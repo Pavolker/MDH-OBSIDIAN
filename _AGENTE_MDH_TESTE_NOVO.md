@@ -1,6 +1,8 @@
 # Teste — Conexão Agente MDH
 
 ✅ Escrita funcionando
+✅ Edição funcionando
+✅ Deleção: veremos a seguir
 
 ---
-*Criado em 12/05/2026*
+*Editado em 12/05/2026*
